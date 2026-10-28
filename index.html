@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>单词小探险</title>
+    <style>
+        body { margin: 0; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .card { background: white; border-radius: 24px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; width: 90%; max-width: 450px; position: relative; }
+        
+        .character-box { font-size: 65px; margin: -10px 0 10px 0; transition: transform 0.3s; }
+        .character-box.listening { transform: scale(1.1) translateY(-5px); }
+        .character-box.happy { transform: scale(1.2) rotate(10deg); }
+        
+        .word { font-size: 48px; color: #ff6b6b; font-weight: bold; margin: 0 0 5px; }
+        .meaning { font-size: 22px; color: #4ecdc4; margin-bottom: 20px; font-weight: bold; }
+        
+        .sentence-box { background-color: #fff9e6; border-radius: 15px; padding: 15px; margin-bottom: 20px; border: 2px dashed #ffd166; }
+        .sentence-en { font-size: 20px; color: #333; font-weight: bold; margin-bottom: 5px; }
+        .sentence-zh { font-size: 16px; color: #666; }
+        
+        .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn { border: none; border-radius: 50px; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn:active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-play { background-color: #ffd166; color: #333; }
+        .btn-mic { background-color: #ef476f; color: white; }
+        
+        .stars { font-size: 24px; margin-top: 10px; min-height: 35px; }
+        .progress { position: absolute; top: 15px; left: 15px; font-size: 14px; color: #999; font-weight: bold; background: #f1f3f5; padding: 5px 12px; border-radius: 20px; }
+        #feedback { font-size: 16px; margin-top: 15px; height: 24px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card" id="app-card">
+        <div class="progress" id="progress">今日: 1 / 6</div>
+        <div class="stars" id="stars"></div>
+        
+        <div class="character-box" id="character">🦊</div>
+        
+        <div class="word" id="word">Apple</div>
+        <div class="meaning" id="meaning">苹果</div>
+
+        <div class="sentence-box">
+            <div class="sentence-en" id="sentence-en">It is a red apple.</div>
+            <div class="sentence-zh" id="sentence-zh">它是一个红色的苹果。</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-play" onclick="playWordAudio()">🔊 听单词</button>
+            <button class="btn btn-play" onclick="playSentenceAudio()">🗣️ 听句子</button>
+            <button class="btn btn-mic" onclick="startMic()">🎤 我来读</button>
+        </div>
+        <p id="feedback" style="color: #666;"></p>
+    </div>
+
+    <script>
+        const words = [
+            { en: "Apple", zh: "苹果", senEn: "It is a red apple.", senZh: "它是一个红色的苹果。" },
+            { en: "Tiger", zh: "老虎", senEn: "The tiger is big.", senZh: "这只老虎很大。" },
+            { en: "Fox", zh: "狐狸", senEn: "A smart little fox.", senZh: "一只聪明的小狐狸。" },
+            { en: "Star", zh: "星星", senEn: "Look at the star.", senZh: "看那颗星星。" },
+            { en: "Happy", zh: "开心", senEn: "I am very happy.", senZh: "我非常开心。" },
+            { en: "Jump", zh: "跳跃", senEn: "The boy can jump.", senZh: "这个男孩会跳。" }
+        ];
+        
+        let currentIndex = 0;
+        let starCount = 0;
+
+        function updateUI() {
+            if (currentIndex >= words.length) {
+                document.getElementById('app-card').innerHTML = `
+                    <h2 style="color: #ff6b6b; font-size: 28px;">🎉 任务完成！</h2>
+                    <div style="font-size: 80px; margin: 20px 0;">🌟</div>
+                    <p style="color: #4ecdc4; font-size: 20px; font-weight: bold;">小狐狸要去休息啦</p>
+                    <p style="color: #666;">你今天获得了 ${starCount} 颗星星，明天继续来探索吧！</p>
+                `;
+                return;
+            }
+            
+            const currentData = words[currentIndex];
+            document.getElementById('word').innerText = currentData.en;
+            document.getElementById('meaning').innerText = currentData.zh;
+            document.getElementById('sentence-en').innerText = currentData.senEn;
+            document.getElementById('sentence-zh').innerText = currentData.senZh;
+            document.getElementById('progress').innerText = `今日: ${currentIndex + 1} / 6`;
+            
+            const character = document.getElementById('character');
+            character.innerText = "🦊"; 
+            character.className = "character-box";
+            
+            const feedback = document.getElementById('feedback');
+            feedback.innerText = "点击🎤读给小狐狸听！";
+            feedback.style.color = "#999";
+            document.getElementById('stars').innerText = "⭐".repeat(starCount);
+        }
+
+        function playWordAudio() {
+            const currentData = words[currentIndex];
+            const wordAudioUrl = `https://dict.youdao.com/dictvoice?audio=${currentData.en.toLowerCase()}&type=2`;
+            new Audio(wordAudioUrl).play();
+        }
+
+        function playSentenceAudio() {
+            const currentData = words[currentIndex];
+            const sentenceAudioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(currentData.senEn)}&type=2`;
+            new Audio(sentenceAudioUrl).play();
+        }
+
+        function startMic() {
+            const feedback = document.getElementById('feedback');
+            const character = document.getElementById('character');
+            
+            if (window.location.protocol === 'file:') {
+                feedback.innerHTML = "⚠️ <b>本地文件无法使用麦克风！</b><br>请将代码上传至GitHub Pages后测试。";
+                feedback.style.color = "#ff0000";
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                feedback.innerText = "⚠️ 当前浏览器不支持语音检测，请在 Safari 或 Chrome 中打开。";
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            
+            character.innerText = "🦊👂";
+            character.classList.add("listening");
+            feedback.innerText = "小狐狸正在听，请大声读...";
+            feedback.style.color = "#4ecdc4";
+            
+            recognition.onresult = function(event) {
+                const spoken = event.results[0][0].transcript.toLowerCase();
+                const targetWord = words[currentIndex].en.toLowerCase();
+                
+                if (spoken.includes(targetWord)) {
+                    character.innerText = "🦊✨";
+                    character.classList.remove("listening");
+                    character.classList.add("happy");
+                    feedback.innerText = `✅ 识别到: "${spoken}"。读得真棒！`;
+                    feedback.style.color = "#06d6a0";
+                    starCount++;
+                    document.getElementById('stars').innerText = "⭐".repeat(starCount);
+                    setTimeout(() => { currentIndex++; updateUI(); }, 2000);
+                } else {
+                    character.innerText = "🦊❓";
+                    character.classList.remove("listening");
+                    feedback.innerText = `👂 识别到: "${spoken}"，好像不太对哦，再试一次！`;
+                    feedback.style.color = "#ff6b6b";
+                }
+            };
+
+            recognition.onerror = function(event) {
+                character.innerText = "🦊❓";
+                character.classList.remove("listening");
+                feedback.innerText = "没听清，或者尚未允许麦克风权限。";
+                feedback.style.color = "#ff6b6b";
+            };
+
+            recognition.start();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
