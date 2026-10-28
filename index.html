@@ -3,165 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>单词小探险</title>
+    <title>小猪单词大冒险</title>
     <style>
-        body { margin: 0; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background-color: #f0f8ff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .card { background: white; border-radius: 24px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; width: 90%; max-width: 450px; position: relative; }
+        body { margin: 0; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background-color: #fff0f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         
-        .character-box { font-size: 65px; margin: -10px 0 10px 0; transition: transform 0.3s; }
-        .character-box.listening { transform: scale(1.1) translateY(-5px); }
-        .character-box.happy { transform: scale(1.2) rotate(10deg); }
+        .card { background: white; border-radius: 30px; padding: 25px 20px; box-shadow: 0 12px 30px rgba(255, 182, 193, 0.4); text-align: center; width: 90%; max-width: 450px; position: relative; }
         
-        .word { font-size: 48px; color: #ff6b6b; font-weight: bold; margin: 0 0 5px; }
-        .meaning { font-size: 22px; color: #4ecdc4; margin-bottom: 20px; font-weight: bold; }
+        /* 顶部进度和星星 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 0 10px; }
+        .progress { font-size: 14px; color: #ff6b81; font-weight: bold; background: #ffe4e1; padding: 6px 15px; border-radius: 20px; }
+        .stars { font-size: 20px; color: #ffd32a; font-weight: bold; }
+
+        /* 👑 新增：孩子定制照片框样式 */
+        .child-photo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; }
+        .child-photo { width: 75px; height: 75px; border-radius: 50%; border: 4px solid #ffa502; box-shadow: 0 4px 10px rgba(0,0,0,0.15); object-fit: cover; }
+        .child-label { font-size: 14px; color: #ffa502; font-weight: bold; background: #fffaf0; border: 1.5px solid #ffa502; padding: 2px 10px; border-radius: 12px; margin-top: -8px; z-index: 10; }
+
+        /* 角色和核心展示区 */
+        .mascot { font-size: 40px; margin-bottom: -10px; transition: transform 0.3s; }
+        .mascot.happy { transform: scale(1.2) translateY(-10px); }
+        .emoji-pic { font-size: 65px; margin: 5px 0; }
         
-        .sentence-box { background-color: #fff9e6; border-radius: 15px; padding: 15px; margin-bottom: 20px; border: 2px dashed #ffd166; }
-        .sentence-en { font-size: 20px; color: #333; font-weight: bold; margin-bottom: 5px; }
-        .sentence-zh { font-size: 16px; color: #666; }
+        .word { font-size: 50px; color: #ff4757; font-weight: bold; margin: 0; letter-spacing: 2px; }
+        .meaning { font-size: 22px; color: #2ed573; font-weight: bold; margin-bottom: 15px; }
         
-        .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .btn { border: none; border-radius: 50px; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn:active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-play { background-color: #ffd166; color: #333; }
-        .btn-mic { background-color: #ef476f; color: white; }
+        .sentence-box { background-color: #f1f2f6; border-radius: 18px; padding: 12px; margin-bottom: 15px; border: 2px solid #dfe4ea; }
+        .sentence-en { font-size: 17px; color: #2f3542; font-weight: bold; margin-bottom: 4px; }
+        .sentence-zh { font-size: 14px; color: #747d8c; }
         
-        .stars { font-size: 24px; margin-top: 10px; min-height: 35px; }
-        .progress { position: absolute; top: 15px; left: 15px; font-size: 14px; color: #999; font-weight: bold; background: #f1f3f5; padding: 5px 12px; border-radius: 20px; }
-        #feedback { font-size: 16px; margin-top: 15px; height: 24px; font-weight: bold; }
+        /* 按钮样式 */
+        .btn-group { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 5px; }
+        .btn { border: none; border-radius: 50px; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn:active { transform: scale(0.92); }
+        .btn-audio { background-color: #1e90ff; color: white; }
+        .btn-action { background-color: #ffa502; color: white; width: 85%; padding: 14px; font-size: 18px; margin-top: 5px; animation: pulse 2s infinite; }
+        
+        /* 测验选项按钮 */
+        .option-btn { background-color: white; border: 3px solid #dfe4ea; color: #2f3542; border-radius: 20px; padding: 12px; font-size: 18px; font-weight: bold; width: 90%; margin: 8px auto; display: block; cursor: pointer; transition: all 0.2s; }
+        .option-btn:active { transform: scale(0.95); background-color: #f1f2f6; }
+        .option-correct { border-color: #2ed573; background-color: #e8f8f5; color: #2ed573; }
+        .option-wrong { border-color: #ff4757; background-color: #ffeaa7; color: #ff4757; }
+
+        #feedback { font-size: 16px; margin-top: 10px; height: 20px; font-weight: bold; color: #ff6b61; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
     <div class="card" id="app-card">
-        <div class="progress" id="progress">今日: 1 / 6</div>
-        <div class="stars" id="stars"></div>
-        
-        <div class="character-box" id="character">🦊</div>
-        
-        <div class="word" id="word">Apple</div>
-        <div class="meaning" id="meaning">苹果</div>
-
-        <div class="sentence-box">
-            <div class="sentence-en" id="sentence-en">It is a red apple.</div>
-            <div class="sentence-zh" id="sentence-zh">它是一个红色的苹果。</div>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn btn-play" onclick="playWordAudio()">🔊 听单词</button>
-            <button class="btn btn-play" onclick="playSentenceAudio()">🗣️ 听句子</button>
-            <button class="btn btn-mic" onclick="startMic()">🎤 我来读</button>
-        </div>
-        <p id="feedback" style="color: #666;"></p>
+        <!-- 界面由 JS 动态渲染 -->
     </div>
 
     <script>
+        // 精心设计的词库
         const words = [
-            { en: "Apple", zh: "苹果", senEn: "It is a red apple.", senZh: "它是一个红色的苹果。" },
-            { en: "Tiger", zh: "老虎", senEn: "The tiger is big.", senZh: "这只老虎很大。" },
-            { en: "Fox", zh: "狐狸", senEn: "A smart little fox.", senZh: "一只聪明的小狐狸。" },
-            { en: "Star", zh: "星星", senEn: "Look at the star.", senZh: "看那颗星星。" },
-            { en: "Happy", zh: "开心", senEn: "I am very happy.", senZh: "我非常开心。" },
-            { en: "Jump", zh: "跳跃", senEn: "The boy can jump.", senZh: "这个男孩会跳。" }
+            { en: "Apple", zh: "苹果", emoji: "🍎", senEn: "It is a red apple.", senZh: "它是一个红色的苹果。", options: ["老虎", "苹果", "星星"], answer: "苹果" },
+            { en: "Tiger", zh: "老虎", emoji: "🐯", senEn: "The tiger is big.", senZh: "这只老虎很大。", options: ["老虎", "狐狸", "开心"], answer: "老虎" },
+            { en: "Fox", zh: "狐狸", emoji: "🦊", senEn: "A smart little fox.", senZh: "一只聪明的小狐狸。", options: ["跳跃", "苹果", "狐狸"], answer: "狐狸" },
+            { en: "Star", zh: "星星", emoji: "⭐", senEn: "Look at the star.", senZh: "看那颗星星。", options: ["星星", "开心", "苹果"], answer: "星星" },
+            { en: "Happy", zh: "开心", emoji: "😊", senEn: "I am very happy.", senZh: "我非常开心。", options: ["老虎", "星星", "开心"], answer: "开心" },
+            { en: "Jump", zh: "跳跃", emoji: "🦘", senEn: "The boy can jump.", senZh: "这个男孩会跳。", options: ["狐狸", "跳跃", "苹果"], answer: "跳跃" }
         ];
         
         let currentIndex = 0;
         let starCount = 0;
+        let mode = "learn"; // 当前模式：learn (学习) 或 quiz (测试)
 
-        function updateUI() {
+        const appCard = document.getElementById('app-card');
+
+        // 🔊 升级：采用最稳定、纯正的线上发音接口
+        function playAudio(text) {
+            // 利用有道词典的真人发音接口，可完美处理长句
+            const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+            const audio = new Audio(url);
+            audio.play().catch(e => console.log("播放失败: ", e));
+        }
+
+        // 渲染界面
+        function render() {
+            // 闯关完成界面
             if (currentIndex >= words.length) {
-                document.getElementById('app-card').innerHTML = `
-                    <h2 style="color: #ff6b6b; font-size: 28px;">🎉 任务完成！</h2>
-                    <div style="font-size: 80px; margin: 20px 0;">🌟</div>
-                    <p style="color: #4ecdc4; font-size: 20px; font-weight: bold;">小狐狸要去休息啦</p>
-                    <p style="color: #666;">你今天获得了 ${starCount} 颗星星，明天继续来探索吧！</p>
+                appCard.innerHTML = `
+                    <div class="child-photo-container">
+                        <img class="child-photo" src="child.jpg" onerror="this.style.display='none'">
+                        <div class="child-label">背词小勇士</div>
+                    </div>
+                    <div class="mascot happy">🐷💤</div>
+                    <h2 style="color: #ff4757; font-size: 28px; margin: 10px 0;">通关大胜利！</h2>
+                    <div style="font-size: 55px; margin: 5px 0;">🏆</div>
+                    <p style="color: #2ed573; font-size: 20px; font-weight: bold;">今天的6个单词都学会啦！</p>
+                    <p style="color: #747d8c; font-size: 15px;">小猪累了要休息啦，你今天拿到了 ${starCount} 颗⭐！</p>
                 `;
                 return;
             }
-            
-            const currentData = words[currentIndex];
-            document.getElementById('word').innerText = currentData.en;
-            document.getElementById('meaning').innerText = currentData.zh;
-            document.getElementById('sentence-en').innerText = currentData.senEn;
-            document.getElementById('sentence-zh').innerText = currentData.senZh;
-            document.getElementById('progress').innerText = `今日: ${currentIndex + 1} / 6`;
-            
-            const character = document.getElementById('character');
-            character.innerText = "🦊"; 
-            character.className = "character-box";
-            
-            const feedback = document.getElementById('feedback');
-            feedback.innerText = "点击🎤读给小狐狸听！";
-            feedback.style.color = "#999";
-            document.getElementById('stars').innerText = "⭐".repeat(starCount);
-        }
 
-        function playWordAudio() {
-            const currentData = words[currentIndex];
-            const wordAudioUrl = `https://dict.youdao.com/dictvoice?audio=${currentData.en.toLowerCase()}&type=2`;
-            new Audio(wordAudioUrl).play();
-        }
+            const data = words[currentIndex];
 
-        function playSentenceAudio() {
-            const currentData = words[currentIndex];
-            const sentenceAudioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(currentData.senEn)}&type=2`;
-            new Audio(sentenceAudioUrl).play();
-        }
+            // --- 学习模式界面 ---
+            if (mode === "learn") {
+                appCard.innerHTML = `
+                    <div class="header">
+                        <div class="progress">第 ${currentIndex + 1} 个 / 共 6 个</div>
+                        <div class="stars">⭐ ${starCount}</div>
+                    </div>
+                    
+                    <!-- 👑 专属定制：孩子照片展示框（如果没检测到图片则不显示） -->
+                    <div class="child-photo-container">
+                        <img class="child-photo" src="child.jpg" onerror="this.src='https://placehold.co/100x100?text=👶'">
+                        <div class="child-label">小勇士的小屋</div>
+                    </div>
 
-        function startMic() {
-            const feedback = document.getElementById('feedback');
-            const character = document.getElementById('character');
+                    <div class="emoji-pic">${data.emoji}</div>
+                    <div class="word">${data.en}</div>
+                    <div class="meaning">${data.zh}</div>
+                    
+                    <div class="sentence-box">
+                        <div class="sentence-en">${data.senEn}</div>
+                        <div class="sentence-zh">${data.senZh}</div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-audio" onclick="playAudio('${data.en}')">🔊 听单词</button>
+                        <button class="btn btn-audio" onclick="playAudio('${data.senEn}')">🗣️ 听句子</button>
+                    </div>
+                    <button class="btn btn-action" onclick="goToQuiz()">✨ 记住了，去闯关！</button>
+                `;
+                // 进入卡片时自动播放一下单词发音
+                setTimeout(() => playAudio(data.en), 300);
+            } 
             
-            if (window.location.protocol === 'file:') {
-                feedback.innerHTML = "⚠️ <b>本地文件无法使用麦克风！</b><br>请将代码上传至GitHub Pages后测试。";
-                feedback.style.color = "#ff0000";
-                return;
+            // --- 测试模式界面 ---
+            else if (mode === "quiz") {
+                let optionsHtml = '';
+                data.options.forEach(opt => {
+                    optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${opt}', '${data.answer}')">${opt}</button>`;
+                });
+
+                appCard.innerHTML = `
+                    <div class="header">
+                        <div class="progress">小测试</div>
+                        <div class="stars">⭐ ${starCount}</div>
+                    </div>
+                    <div class="child-photo-container">
+                        <img class="child-photo" src="child.jpg" onerror="this.src='https://placehold.co/100x100?text=👶'">
+                        <div class="child-label">挑战中...</div>
+                    </div>
+                    <div class="word" style="font-size: 40px; margin: 10px 0;">${data.en}</div>
+                    <button class="btn btn-audio" style="margin-bottom: 15px;" onclick="playAudio('${data.en}')">🔊 再听一遍</button>
+                    <p style="color: #747d8c; margin-bottom: 8px; font-weight: bold; font-size: 15px;">请选出正确的中文意思：</p>
+                    
+                    ${optionsHtml}
+                    
+                    <div id="feedback"></div>
+                `;
             }
+        }
 
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                feedback.innerText = "⚠️ 当前浏览器不支持语音检测，请在 Safari 或 Chrome 中打开。";
-                return;
-            }
+        // 切换到测试模式
+        function goToQuiz() {
+            mode = "quiz";
+            render();
+        }
 
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
+        // 检查答案
+        function checkAnswer(btnElement, selected, correct) {
+            const feedback = document.getElementById('feedback');
             
-            character.innerText = "🦊👂";
-            character.classList.add("listening");
-            feedback.innerText = "小狐狸正在听，请大声读...";
-            feedback.style.color = "#4ecdc4";
-            
-            recognition.onresult = function(event) {
-                const spoken = event.results[0][0].transcript.toLowerCase();
-                const targetWord = words[currentIndex].en.toLowerCase();
+            // 禁用所有按钮防止重复点击
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                // 答对了
+                btnElement.classList.add('option-correct');
+                feedback.innerText = "✅ 太聪明了！奖励一颗星星！";
+                feedback.style.color = "#2ed573";
+                playAudio('excellent'); // 鼓励音效
+                starCount++;
                 
-                if (spoken.includes(targetWord)) {
-                    character.innerText = "🦊✨";
-                    character.classList.remove("listening");
-                    character.classList.add("happy");
-                    feedback.innerText = `✅ 识别到: "${spoken}"。读得真棒！`;
-                    feedback.style.color = "#06d6a0";
-                    starCount++;
-                    document.getElementById('stars').innerText = "⭐".repeat(starCount);
-                    setTimeout(() => { currentIndex++; updateUI(); }, 2000);
-                } else {
-                    character.innerText = "🦊❓";
-                    character.classList.remove("listening");
-                    feedback.innerText = `👂 识别到: "${spoken}"，好像不太对哦，再试一次！`;
-                    feedback.style.color = "#ff6b6b";
-                }
-            };
-
-            recognition.onerror = function(event) {
-                character.innerText = "🦊❓";
-                character.classList.remove("listening");
-                feedback.innerText = "没听清，或者尚未允许麦克风权限。";
-                feedback.style.color = "#ff6b6b";
-            };
-
-            recognition.start();
+                // 1.5秒后进入下一个单词
+                setTimeout(() => {
+                    currentIndex++;
+                    mode = "learn";
+                    render();
+                }, 1500);
+            } else {
+                // 答错了
+                btnElement.classList.add('option-wrong');
+                feedback.innerText = "❌ 不太对哦，再想想看！";
+                feedback.style.color = "#ff4757";
+                
+                // 1.5秒后重置按钮，让孩子重新选
+                setTimeout(() => {
+                    btnElement.classList.remove('option-wrong');
+                    feedback.innerText = "";
+                    allBtns.forEach(b => b.disabled = false);
+                }, 1500);
+            }
         }
 
-        updateUI();
+        // 初始化渲染
+        render();
     </script>
 </body>
 </html>
