@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小猪单词大冒险</title>
+    <title>小勇士单词大冒险</title>
     <style>
         body { margin: 0; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background-color: #fff0f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        
         .card { background: white; border-radius: 30px; padding: 25px 20px; box-shadow: 0 12px 30px rgba(255, 182, 193, 0.4); text-align: center; width: 90%; max-width: 450px; position: relative; }
         
-        /* 顶部进度和星星 */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 0 10px; }
         .progress { font-size: 14px; color: #ff6b81; font-weight: bold; background: #ffe4e1; padding: 6px 15px; border-radius: 20px; }
         .stars { font-size: 20px; color: #ffd32a; font-weight: bold; }
 
-        /* 👑 新增：孩子定制照片框样式 */
         .child-photo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; }
         .child-photo { width: 75px; height: 75px; border-radius: 50%; border: 4px solid #ffa502; box-shadow: 0 4px 10px rgba(0,0,0,0.15); object-fit: cover; }
         .child-label { font-size: 14px; color: #ffa502; font-weight: bold; background: #fffaf0; border: 1.5px solid #ffa502; padding: 2px 10px; border-radius: 12px; margin-top: -8px; z-index: 10; }
 
-        /* 角色和核心展示区 */
         .mascot { font-size: 40px; margin-bottom: -10px; transition: transform 0.3s; }
         .mascot.happy { transform: scale(1.2) translateY(-10px); }
         .emoji-pic { font-size: 65px; margin: 5px 0; }
@@ -31,14 +27,13 @@
         .sentence-en { font-size: 17px; color: #2f3542; font-weight: bold; margin-bottom: 4px; }
         .sentence-zh { font-size: 14px; color: #747d8c; }
         
-        /* 按钮样式 */
         .btn-group { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 5px; }
         .btn { border: none; border-radius: 50px; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .btn:active { transform: scale(0.92); }
         .btn-audio { background-color: #1e90ff; color: white; }
         .btn-action { background-color: #ffa502; color: white; width: 85%; padding: 14px; font-size: 18px; margin-top: 5px; animation: pulse 2s infinite; }
+        .btn-next-day { background-color: #2ed573; color: white; width: 85%; padding: 16px; font-size: 20px; margin-top: 20px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(46, 213, 115, 0.4); }
         
-        /* 测验选项按钮 */
         .option-btn { background-color: white; border: 3px solid #dfe4ea; color: #2f3542; border-radius: 20px; padding: 12px; font-size: 18px; font-weight: bold; width: 90%; margin: 8px auto; display: block; cursor: pointer; transition: all 0.2s; }
         .option-btn:active { transform: scale(0.95); background-color: #f1f2f6; }
         .option-correct { border-color: #2ed573; background-color: #e8f8f5; color: #2ed573; }
@@ -46,168 +41,270 @@
 
         #feedback { font-size: 16px; margin-top: 10px; height: 20px; font-weight: bold; color: #ff6b61; }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
-    <div class="card" id="app-card">
-        <!-- 界面由 JS 动态渲染 -->
-    </div>
+    <div class="card" id="app-card"></div>
 
     <script>
-        // 精心设计的词库
-        const words = [
-            { en: "Apple", zh: "苹果", emoji: "🍎", senEn: "It is a red apple.", senZh: "它是一个红色的苹果。", options: ["老虎", "苹果", "星星"], answer: "苹果" },
-            { en: "Tiger", zh: "老虎", emoji: "🐯", senEn: "The tiger is big.", senZh: "这只老虎很大。", options: ["老虎", "狐狸", "开心"], answer: "老虎" },
-            { en: "Fox", zh: "狐狸", emoji: "🦊", senEn: "A smart little fox.", senZh: "一只聪明的小狐狸。", options: ["跳跃", "苹果", "狐狸"], answer: "狐狸" },
-            { en: "Star", zh: "星星", emoji: "⭐", senEn: "Look at the star.", senZh: "看那颗星星。", options: ["星星", "开心", "苹果"], answer: "星星" },
-            { en: "Happy", zh: "开心", emoji: "😊", senEn: "I am very happy.", senZh: "我非常开心。", options: ["老虎", "星星", "开心"], answer: "开心" },
-            { en: "Jump", zh: "跳跃", emoji: "🦘", senEn: "The boy can jump.", senZh: "这个男孩会跳。", options: ["狐狸", "跳跃", "苹果"], answer: "跳跃" }
+        // 紧凑型词库：涵盖动物、颜色、身体、食物、动作等100个一年级核心单词
+        const rawWords = [
+            ["Apple","苹果","🍎","I like apples.","我喜欢苹果。"], ["Tiger","老虎","🐯","The tiger is big.","老虎很大。"], 
+            ["Fox","狐狸","🦊","A smart fox.","一只聪明的狐狸。"], ["Star","星星","⭐","Look at the star.","看那颗星星。"], 
+            ["Happy","开心","😊","I am happy.","我很开心。"], ["Jump","跳跃","🦘","I can jump.","我会跳。"], 
+            ["Cat","猫","🐱","The cat is cute.","这只猫很可爱。"], ["Dog","狗","🐶","My dog can run.","我的狗会跑。"], 
+            ["Pig","猪","🐷","A pink pig.","一只粉色的猪。"], ["Bird","鸟","🐦","The bird flies.","鸟儿飞。"],
+            ["Fish","鱼","🐟","Fish swim in water.","鱼在水里游。"], ["Duck","鸭子","🦆","The duck goes quack.","鸭子嘎嘎叫。"], 
+            ["Cow","奶牛","🐮","The cow gives milk.","奶牛产奶。"], ["Sheep","绵羊","🐑","A white sheep.","一只白色的绵羊。"], 
+            ["Horse","马","🐴","Ride a horse.","骑马。"], ["Mouse","老鼠","🐭","A little mouse.","一只小老鼠。"], 
+            ["Rabbit","兔子","🐰","The rabbit jumps.","兔子跳。"], ["Frog","青蛙","🐸","A green frog.","一只绿色的青蛙。"], 
+            ["Monkey","猴子","🐵","The monkey eats bananas.","猴子吃香蕉。"], ["Bear","熊","🐻","A big brown bear.","一只大棕熊。"],
+            ["Red","红色","🔴","A red apple.","一个红苹果。"], ["Blue","蓝色","🔵","The sky is blue.","天空是蓝色的。"], 
+            ["Yellow","黄色","🟡","A yellow banana.","一根黄香蕉。"], ["Green","绿色","🟢","Green grass.","绿草。"], 
+            ["Pink","粉色","🌸","A pink flower.","一朵粉色的花。"], ["Black","黑色","⚫","A black cat.","一只黑猫。"], 
+            ["White","白色","⚪","White snow.","白雪。"], ["Orange","橙色/橙子","🍊","An orange.","一个橙子。"], 
+            ["Purple","紫色","🟣","Purple grapes.","紫葡萄。"], ["Brown","棕色","🟤","A brown dog.","一只棕色的狗。"],
+            ["One","一","1️⃣","One apple.","一个苹果。"], ["Two","二","2️⃣","Two cats.","两只猫。"], 
+            ["Three","三","3️⃣","Three birds.","三只鸟。"], ["Four","四","4️⃣","Four dogs.","四条狗。"], 
+            ["Five","五","5️⃣","Five fish.","五条鱼。"], ["Six","六","6️⃣","Six pigs.","六头猪。"], 
+            ["Seven","七","7️⃣","Seven stars.","七颗星星。"], ["Eight","八","8️⃣","Eight books.","八本书。"], 
+            ["Nine","九","9️⃣","Nine pens.","九支笔。"], ["Ten","十","🔟","Ten fingers.","十个手指。"],
+            ["Head","头","👤","Nod your head.","点点头。"], ["Eye","眼睛","👁️","Open your eyes.","睁开眼睛。"], 
+            ["Ear","耳朵","👂","Touch your ear.","摸摸你的耳朵。"], ["Nose","鼻子","👃","My small nose.","我的小鼻子。"], 
+            ["Mouth","嘴巴","👄","Open your mouth.","张开嘴巴。"], ["Hand","手","✋","Clap your hands.","拍拍手。"], 
+            ["Foot","脚","🦶","Stamp your feet.","跺跺脚。"], ["Leg","腿","🦵","My long legs.","我的长腿。"], 
+            ["Arm","手臂","💪","Wave your arm.","挥动手臂。"], ["Hair","头发","💇","Black hair.","黑头发。"],
+            ["Boy","男孩","👦","He is a boy.","他是一个男孩。"], ["Girl","女孩","👧","She is a girl.","她是一个女孩。"], 
+            ["Man","男人","👨","A tall man.","一个高个男人。"], ["Woman","女人","👩","A nice woman.","一个好女人。"], 
+            ["Baby","婴儿","👶","A cute baby.","一个可爱的婴儿。"], ["Mom","妈妈","👩‍👧","I love mom.","我爱妈妈。"], 
+            ["Dad","爸爸","👨‍👦","My dad is strong.","我爸爸很强壮。"], ["Teacher","老师","👩‍🏫","Listen to the teacher.","听老师的话。"], 
+            ["Student","学生","🎒","I am a student.","我是一个学生。"], ["Friend","朋友","🤝","My good friend.","我的好朋友。"],
+            ["Banana","香蕉","🍌","A yellow banana.","一根黄香蕉。"], ["Grape","葡萄","🍇","Sweet grapes.","甜葡萄。"], 
+            ["Watermelon","西瓜","🍉","A big watermelon.","一个大西瓜。"], ["Milk","牛奶","🥛","Drink milk.","喝牛奶。"], 
+            ["Water","水","💧","Drink water.","喝水。"], ["Bread","面包","🍞","Eat bread.","吃面包。"], 
+            ["Rice","米饭","🍚","I like rice.","我喜欢米饭。"], ["Egg","鸡蛋","🥚","An egg.","一个鸡蛋。"], 
+            ["Book","书","📖","Read a book.","看书。"], ["Pen","钢笔","🖊️","Write with a pen.","用钢笔写字。"],
+            ["Bag","书包","🎒","My school bag.","我的书包。"], ["Desk","书桌","🪑","Sit at the desk.","坐在书桌前。"], 
+            ["Chair","椅子","🪑","Sit on the chair.","坐在椅子上。"], ["Cup","杯子","☕","A red cup.","一个红杯子。"], 
+            ["Bed","床","🛏️","Go to bed.","上床睡觉。"], ["Toy","玩具","🧸","Play with toys.","玩玩具。"], 
+            ["Car","汽车","🚗","A fast car.","一辆快车。"], ["Bus","公交车","🚌","Take the bus.","乘公交车。"], 
+            ["Train","火车","🚂","A long train.","一列长长的火车。"], ["Plane","飞机","✈️","The plane flies.","飞机飞翔。"],
+            ["Sun","太阳","☀️","The sun is hot.","太阳很热。"], ["Moon","月亮","🌙","Look at the moon.","看月亮。"], 
+            ["Sky","天空","☁️","The blue sky.","蓝蓝的天空。"], ["Tree","树","🌳","A tall tree.","一棵高树。"], 
+            ["Flower","花","🌻","A beautiful flower.","一朵美丽的花。"], ["Grass","草","🌿","Green grass.","绿色的草。"], 
+            ["Rain","雨","🌧️","It is raining.","下雨了。"], ["Snow","雪","❄️","White snow.","白白的雪。"], 
+            ["Wind","风","💨","The wind blows.","风在吹。"], ["Run","跑","🏃","I can run.","我会跑。"],
+            ["Walk","走","🚶","Walk to school.","走路去学校。"], ["Fly","飞","🦅","Birds fly.","鸟儿飞翔。"], 
+            ["Swim","游泳","🏊","Swim in the pool.","在泳池里游泳。"], ["Big","大的","🐘","An elephant is big.","大象很大。"], 
+            ["Small","小的","🐜","An ant is small.","蚂蚁很小。"], ["Good","好的","👍","Good boy.","好孩子。"], 
+            ["Bad","坏的","👎","Bad weather.","坏天气。"], ["Sad","伤心","😢","Don't be sad.","不要伤心。"], 
+            ["Hot","热","🔥","It is hot.","天气很热。"], ["Cold","冷","🥶","It is cold.","天气很冷。"]
         ];
         
-        let currentIndex = 0;
-        let starCount = 0;
-        let mode = "learn"; // 当前模式：learn (学习) 或 quiz (测试)
+        // 将紧凑数组转换为对象数组
+        const allWords = rawWords.map(w => ({ en: w[0], zh: w[1], emoji: w[2], senEn: w[3], senZh: w[4] }));
+        const wordsPerDay = 6;
+        
+        // 本地状态管理
+        let state = JSON.parse(localStorage.getItem('pigAppState')) || {
+            currentDayIndex: 0, 
+            todayQueue: [], // 存放今天还需要学习/复习的单词索引
+            starCount: 0
+        };
+
+        let mode = "learn"; 
+        let currentWordObj = null;
 
         const appCard = document.getElementById('app-card');
 
-        // 🔊 升级：采用最稳定、纯正的线上发音接口
         function playAudio(text) {
-            // 利用有道词典的真人发音接口，可完美处理长句
             const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
-            const audio = new Audio(url);
-            audio.play().catch(e => console.log("播放失败: ", e));
+            new Audio(url).play().catch(e => console.log("播放失败: ", e));
         }
 
-        // 渲染界面
+        // 初始化或生成今天的任务队列
+        function initDay() {
+            if (state.todayQueue.length === 0) {
+                let startIdx = state.currentDayIndex * wordsPerDay;
+                if (startIdx >= allWords.length) {
+                    renderAllComplete();
+                    return;
+                }
+                let endIdx = Math.min(startIdx + wordsPerDay, allWords.length);
+                for (let i = startIdx; i < endIdx; i++) {
+                    state.todayQueue.push(i);
+                }
+                saveState();
+            }
+            mode = "learn";
+            render();
+        }
+
+        function saveState() {
+            localStorage.setItem('pigAppState', JSON.stringify(state));
+        }
+
+        // 生成干扰项 (从其他单词中随机抽取2个中文意思)
+        function generateOptions(correctZh) {
+            let options = [correctZh];
+            while(options.length < 3) {
+                let randomWord = allWords[Math.floor(Math.random() * allWords.length)];
+                if(!options.includes(randomWord.zh)) {
+                    options.push(randomWord.zh);
+                }
+            }
+            return options.sort(() => Math.random() - 0.5); // 打乱顺序
+        }
+
+        function renderAllComplete() {
+            appCard.innerHTML = `
+                <div class="child-photo-container">
+                    <img class="child-photo" src="child.jpg" onerror="this.src='https://placehold.co/100x100?text=👶'">
+                    <div class="child-label">满级小勇士</div>
+                </div>
+                <div class="mascot happy">🏆</div>
+                <h2 style="color: #ff4757; font-size: 28px; margin: 10px 0;">太不可思议啦！</h2>
+                <p style="color: #2ed573; font-size: 18px; font-weight: bold;">100个单词已经全部学完！</p>
+                <button class="btn-next-day" onclick="resetAll()">🔄 从头再复习一遍</button>
+            `;
+        }
+
+        function resetAll() {
+            state = { currentDayIndex: 0, todayQueue: [], starCount: 0 };
+            saveState();
+            initDay();
+        }
+
+        function nextDay() {
+            state.currentDayIndex++;
+            state.todayQueue = [];
+            saveState();
+            initDay();
+        }
+
         function render() {
-            // 闯关完成界面
-            if (currentIndex >= words.length) {
+            if (state.todayQueue.length === 0) {
+                // 今天的队列为空，说明过关了
+                let displayDay = state.currentDayIndex + 1;
                 appCard.innerHTML = `
                     <div class="child-photo-container">
-                        <img class="child-photo" src="child.jpg" onerror="this.style.display='none'">
-                        <div class="child-label">背词小勇士</div>
+                        <img class="child-photo" src="child.jpg" onerror="this.src='https://placehold.co/100x100?text=👶'">
+                        <div class="child-label">通关小勇士</div>
                     </div>
                     <div class="mascot happy">🐷💤</div>
-                    <h2 style="color: #ff4757; font-size: 28px; margin: 10px 0;">通关大胜利！</h2>
-                    <div style="font-size: 55px; margin: 5px 0;">🏆</div>
-                    <p style="color: #2ed573; font-size: 20px; font-weight: bold;">今天的6个单词都学会啦！</p>
-                    <p style="color: #747d8c; font-size: 15px;">小猪累了要休息啦，你今天拿到了 ${starCount} 颗⭐！</p>
+                    <h2 style="color: #ff4757; font-size: 28px; margin: 10px 0;">第 ${displayDay} 天通关！</h2>
+                    <div style="font-size: 55px; margin: 5px 0;">🌟</div>
+                    <p style="color: #747d8c; font-size: 16px;">小猪累了要休息啦，目前累计获得 ${state.starCount} 颗⭐！</p>
+                    <button class="btn-next-day" onclick="nextDay()">🚀 开启下一天的学习</button>
                 `;
                 return;
             }
 
-            const data = words[currentIndex];
+            // 获取当前队列第一个单词
+            currentWordObj = allWords[state.todayQueue[0]];
+            let displayDay = state.currentDayIndex + 1;
+            let totalToday = Math.min(wordsPerDay, allWords.length - state.currentDayIndex * wordsPerDay);
+            let remaining = state.todayQueue.length;
+            // 如果出现重考错题，队列长度可能大于初始长度，用计算方式展示进度
+            let progressText = `Day ${displayDay} | 剩余: ${remaining}词`;
 
-            // --- 学习模式界面 ---
             if (mode === "learn") {
                 appCard.innerHTML = `
                     <div class="header">
-                        <div class="progress">第 ${currentIndex + 1} 个 / 共 6 个</div>
-                        <div class="stars">⭐ ${starCount}</div>
+                        <div class="progress">${progressText}</div>
+                        <div class="stars">⭐ ${state.starCount}</div>
                     </div>
-                    
-                    <!-- 👑 专属定制：孩子照片展示框（如果没检测到图片则不显示） -->
                     <div class="child-photo-container">
                         <img class="child-photo" src="child.jpg" onerror="this.src='https://placehold.co/100x100?text=👶'">
                         <div class="child-label">小勇士的小屋</div>
                     </div>
-
-                    <div class="emoji-pic">${data.emoji}</div>
-                    <div class="word">${data.en}</div>
-                    <div class="meaning">${data.zh}</div>
+                    <div class="emoji-pic">${currentWordObj.emoji}</div>
+                    <div class="word">${currentWordObj.en}</div>
+                    <div class="meaning">${currentWordObj.zh}</div>
                     
                     <div class="sentence-box">
-                        <div class="sentence-en">${data.senEn}</div>
-                        <div class="sentence-zh">${data.senZh}</div>
+                        <div class="sentence-en">${currentWordObj.senEn}</div>
+                        <div class="sentence-zh">${currentWordObj.senZh}</div>
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn btn-audio" onclick="playAudio('${data.en}')">🔊 听单词</button>
-                        <button class="btn btn-audio" onclick="playAudio('${data.senEn}')">🗣️ 听句子</button>
+                        <button class="btn btn-audio" onclick="playAudio('${currentWordObj.en}')">🔊 听单词</button>
+                        <button class="btn btn-audio" onclick="playAudio('${currentWordObj.senEn}')">🗣️ 听句子</button>
                     </div>
                     <button class="btn btn-action" onclick="goToQuiz()">✨ 记住了，去闯关！</button>
                 `;
-                // 进入卡片时自动播放一下单词发音
-                setTimeout(() => playAudio(data.en), 300);
+                setTimeout(() => playAudio(currentWordObj.en), 300);
             } 
-            
-            // --- 测试模式界面 ---
             else if (mode === "quiz") {
                 let optionsHtml = '';
-                data.options.forEach(opt => {
-                    optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${opt}', '${data.answer}')">${opt}</button>`;
+                let options = generateOptions(currentWordObj.zh);
+                options.forEach(opt => {
+                    optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${opt}', '${currentWordObj.zh}')">${opt}</button>`;
                 });
 
                 appCard.innerHTML = `
                     <div class="header">
-                        <div class="progress">小测试</div>
-                        <div class="stars">⭐ ${starCount}</div>
+                        <div class="progress">${progressText}</div>
+                        <div class="stars">⭐ ${state.starCount}</div>
                     </div>
                     <div class="child-photo-container">
                         <img class="child-photo" src="child.jpg" onerror="this.src='https://placehold.co/100x100?text=👶'">
                         <div class="child-label">挑战中...</div>
                     </div>
-                    <div class="word" style="font-size: 40px; margin: 10px 0;">${data.en}</div>
-                    <button class="btn btn-audio" style="margin-bottom: 15px;" onclick="playAudio('${data.en}')">🔊 再听一遍</button>
+                    <div class="word" style="font-size: 40px; margin: 10px 0;">${currentWordObj.en}</div>
+                    <button class="btn btn-audio" style="margin-bottom: 15px;" onclick="playAudio('${currentWordObj.en}')">🔊 再听一遍</button>
                     <p style="color: #747d8c; margin-bottom: 8px; font-weight: bold; font-size: 15px;">请选出正确的中文意思：</p>
                     
                     ${optionsHtml}
-                    
                     <div id="feedback"></div>
                 `;
             }
         }
 
-        // 切换到测试模式
         function goToQuiz() {
             mode = "quiz";
             render();
         }
 
-        // 检查答案
         function checkAnswer(btnElement, selected, correct) {
             const feedback = document.getElementById('feedback');
-            
-            // 禁用所有按钮防止重复点击
             const allBtns = document.querySelectorAll('.option-btn');
             allBtns.forEach(b => b.disabled = true);
 
             if (selected === correct) {
-                // 答对了
                 btnElement.classList.add('option-correct');
-                feedback.innerText = "✅ 太聪明了！奖励一颗星星！";
+                feedback.innerText = "✅ 答对啦！";
                 feedback.style.color = "#2ed573";
-                playAudio('excellent'); // 鼓励音效
-                starCount++;
+                playAudio('excellent');
+                state.starCount++;
                 
-                // 1.5秒后进入下一个单词
+                // 答对：将该单词从今天的任务队列中剔除
+                state.todayQueue.shift();
+                saveState();
+                
                 setTimeout(() => {
-                    currentIndex++;
                     mode = "learn";
                     render();
-                }, 1500);
+                }, 1200);
             } else {
-                // 答错了
                 btnElement.classList.add('option-wrong');
-                feedback.innerText = "❌ 不太对哦，再想想看！";
+                feedback.innerText = "❌ 选错咯，待会儿要重考哦！";
                 feedback.style.color = "#ff4757";
                 
-                // 1.5秒后重置按钮，让孩子重新选
+                // 错题重考逻辑：把没掌握的词从队首移出，塞回队尾重考，直到选对为止
+                let failedWordIndex = state.todayQueue.shift();
+                state.todayQueue.push(failedWordIndex);
+                saveState();
+                
                 setTimeout(() => {
-                    btnElement.classList.remove('option-wrong');
-                    feedback.innerText = "";
-                    allBtns.forEach(b => b.disabled = false);
-                }, 1500);
+                    mode = "learn";
+                    render(); // 选错后直接进入下一个排队的词，稍后再重考错题
+                }, 1800);
             }
         }
 
-        // 初始化渲染
-        render();
+        initDay(); // 启动应用
     </script>
 </body>
 </html>
